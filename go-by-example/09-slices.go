@@ -10,6 +10,8 @@ func main() {
 		Slices are an important data type in Go, giving a more powerful interface to sequences than arrays.
 
 		Unlike arrays, slices are typed only by the elements they contain (not the number of elements). An uninitialized slice equals to nil and has length 0.
+
+		Claude AI: In Go, arrays are fixed sized collections, slices are dynamic sized collections.
 	*/
 	var s []string
 	//fmt.Println("Uninitialised slice:", s, s == nil, len(s) == 0)

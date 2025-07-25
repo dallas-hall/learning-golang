@@ -24,7 +24,7 @@ func main() {
 	var fib func(n int) int
 
 	fib = func(n int) int {
-		if n < 2 {
+		if n < 2 { // Base cases: fib(0)=0, fib(1)=1
 			return n
 		}
 		// Since fib was previously declared in main, Go knows which function to call with fib here.

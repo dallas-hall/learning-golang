@@ -5,6 +5,11 @@ import "fmt"
 /*
 Go supports anonymous functions, which can form closures. Anonymous functions are useful when you want to define a function inline without having to name it.
 
+From Claude AI
+"What's a Closure?
+A closure is a function that "captures" variables from its surrounding scope, even after that scope has finished executing.
+Think of it as: A function that "remembers" variables from where it was created."
+
 https://en.wikipedia.org/wiki/Anonymous_function
 https://en.wikipedia.org/wiki/Closure_(computer_science)
 
