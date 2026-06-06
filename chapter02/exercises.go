@@ -7,16 +7,16 @@ import (
 
 func main() {
 	fmt.Println("# Exercise 1")
-	var i int = 20
-	var f float64 = float64(i)
+	var i = 20
+	var f = float64(i)
 
 	fmt.Printf("i: %d\n", i)
 	fmt.Printf("f: %f\n", f)
 
 	fmt.Println("# Exercise 2")
 	const n = 10
-	var i2 int = int(n)
-	var f2 float64 = float64(n)
+	i2 := n
+	var f2 float64 = n
 
 	fmt.Printf("i2: %d\n", i2)
 	fmt.Printf("f2: %f\n", f2)
@@ -38,5 +38,4 @@ func main() {
 	fmt.Printf("b: %d\n", b)
 	fmt.Printf("smallInt: %d\n", smallInt)
 	fmt.Printf("bigInt: %d\n", bigInt)
-
 }
