@@ -8,7 +8,8 @@ import (
 func main() {
 	fmt.Println("# Chapter 4")
 	fmt.Println("## Exercise 1")
-	myInts := []int{}
+	//myInts := []int{}
+	myInts := make([]int, 0, 100)
 	for i := 0; i < 16; i++ {
 		prn := rand.Intn(100)
 		myInts = append(myInts, prn)
@@ -22,7 +23,7 @@ func main() {
 			fmt.Println("Two!")
 		} else if myInts[i]%3 == 0 {
 			fmt.Println("Three!")
-		} else if myInts[i]%2 == 0 && myInts[i]%3 == 0 {
+		} else if myInts[i]%6 == 0 {
 			fmt.Println("Six!")
 		}
 		fmt.Println("Nevermind.")
@@ -35,7 +36,7 @@ func main() {
 			fmt.Println("Two!")
 		case v%3 == 0:
 			fmt.Println("Three!")
-		case v%2 == 0 && v%3 == 0:
+		case v%6 == 0:
 			fmt.Println("Six!")
 		default:
 			fmt.Println("Nevermind.")
@@ -43,7 +44,7 @@ func main() {
 	}
 
 	fmt.Println("## Exercise 3")
-	var total int = 0
+	var total int // Same as `var total int = 0`
 	fmt.Println("### Total Pre-loop")
 	fmt.Println(total)
 	fmt.Println("### Shadow Total During Loop")
