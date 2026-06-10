@@ -74,10 +74,10 @@ func main() {
 
 	fmt.Printf("p1: %v\n", p1)
 	fmt.Printf("p2: %v\n", p2)
-	fmt.Printf("p2: %v\n", p3)
+	fmt.Printf("p3: %v\n", p3)
 
 	fmt.Printf("p1: %+v\n", p1)
 	fmt.Printf("p2: %+v\n", p2)
-	fmt.Printf("p2: %+v\n", p3)
+	fmt.Printf("p3: %+v\n", p3)
 
 }
