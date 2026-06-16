@@ -9,6 +9,7 @@ func hello(s string) {
 }
 
 func main() {
+	fmt.Println("# Chapter 1")
 	fmt.Println("Hello world, from main()")
 	var msg = "Hello world, from hello()"
 	hello(msg)
