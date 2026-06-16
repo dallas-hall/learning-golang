@@ -23,7 +23,7 @@ func main() {
 	fmt.Println("# Chapter 2")
 	book1 := Book{
 		Title:  "Sea Room",
-		Author: "Adom Nicolson",
+		Author: "Adam Nicolson",
 		Copies: 2,
 	}
 
