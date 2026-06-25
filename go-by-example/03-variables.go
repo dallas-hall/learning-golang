@@ -4,7 +4,7 @@ import "fmt"
 
 func main() {
 	/*
-		In Go, variables are explicitly declared and used by the compiler to e.g. check type-correctness of function calls.
+		In Go, variables are explicitly declared and used by the compiler to check type-correctness of function calls.
 	*/
 
 	// var declares 1 or more variables.
@@ -21,7 +21,7 @@ func main() {
 
 	/*
 		Variables declared without a corresponding initialization are zero-valued.
-		
+
 		e.g. the zero value for an int is 0.
 	*/
 	var e int

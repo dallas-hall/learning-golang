@@ -40,7 +40,7 @@ func main() {
 	case t.Hour() < 12:
 		fmt.Println("It is before noon.")
 	default:
-		fmt.Println("It after before noon.")
+		fmt.Println("It is afternoon.")
 	}
 
 	// A type switch compares types instead of values. You can use this to discover the type of an interface value. In this example, the variable t will have the type corresponding to its clause.

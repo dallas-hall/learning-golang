@@ -27,7 +27,7 @@ func main() {
 	b = [...]int{1, 2, 3, 4, 5}
 	fmt.Println("Array 2:", b)
 
-	// If you specify the index with :, the elements in between will be zeroed.
+	// If you specify the index with : then the elements in between will be zeroed.
 	b = [...]int{100, 3: 400, 500}
 	fmt.Println("Array 2:", b)
 
