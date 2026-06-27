@@ -7,7 +7,7 @@ import (
 	"io"    // I/O interfaces
 )
 
-// This function accepts the interfaces io.Reader and io.Writer as parametersThat means a test can pass in a strings.Reader and a bytes.Buffer instead of the real terminal, and check what got written without any actual I/O happening.
+// This function accepts the interfaces io.Reader and io.Writer as parameters. That means a test can pass in a strings.Reader and a bytes.Buffer instead of the real terminal, and check what got written without any actual I/O happening.
 func GreetUser(stdin io.Reader, stdout io.Writer) {
 	name := "you"
 

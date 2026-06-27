@@ -14,7 +14,7 @@ func TestPrintTo_PrintsHelloMessageToGivenWriter(t *testing.T) {
 	t.Parallel()
 	// An all purpose writer that remembers what we write.
 	buffer := new(bytes.Buffer)
-	// Static message usng Fprintln which accepts any io.Writer, in this case the bytes.Buffer which will remember the hardcoded string.
+	// Static message using Fprintln which accepts any io.Writer, in this case the bytes.Buffer which will remember the hardcoded string.
 	helloworld.PrintTo(buffer)
 	want := "Hello world.\n"
 	got := buffer.String()
