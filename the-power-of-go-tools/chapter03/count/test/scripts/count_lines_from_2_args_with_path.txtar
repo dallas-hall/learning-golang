@@ -1,0 +1,17 @@
+# Sets the command to run.
+exec count 3-lines.txt 5-lines.txt
+
+# Asserts what stdout will display using regex.
+stdout '^8\n$'
+
+# Defines our filename and contents.
+-- 3-lines.txt --
+this input
+contains
+3 lines
+-- 5-lines.txt --
+this
+input
+contains
+5
+lines

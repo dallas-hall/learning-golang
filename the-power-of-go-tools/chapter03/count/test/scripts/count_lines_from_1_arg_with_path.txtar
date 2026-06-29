@@ -1,0 +1,11 @@
+# Sets the command to run.
+exec count 3-lines.txt
+
+# Asserts what stdout will display using regex.
+stdout '^3\n$'
+
+# Defines our filename and contents.
+-- 3-lines.txt --
+this input
+contains
+3 lines
