@@ -1,0 +1,14 @@
+# Sets stdin to come from commands run on this file.
+stdin 3-lines.txt
+
+# Sets the command to run.
+exec lines
+
+# Asserts what stdout will display using regex.
+stdout '^3\n$'
+
+# Defines our filename and contents.
+-- 3-lines.txt --
+this input
+contains
+3 lines

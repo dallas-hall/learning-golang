@@ -1,0 +1,17 @@
+exec lines input1 input2.txt
+stdout '^8\n$'
+
+exec words input1 input2.txt
+stdout '^12\n$'
+
+# Multiple files can be defined.
+-- input1 --
+this input
+contains
+3 lines
+-- input2.txt --
+this
+input
+contains
+5
+lines in total

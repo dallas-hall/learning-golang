@@ -1,0 +1,24 @@
+exec count input1.txt input2.txt
+stdout '^12\n$'
+
+exec count -lines input1.txt input2.txt
+stdout '^8\n$'
+exec count --lines input1.txt input2.txt
+stdout '^8\n$'
+
+exec count -bytes input1.txt input2.txt
+stdout '^65\n$'
+exec count --bytes input1.txt input2.txt
+stdout '^65\n$'
+
+# Multiple files can be defined.
+-- input1.txt --
+this input
+contains
+3 lines
+-- input2.txt --
+this
+input
+contains
+5
+lines in total

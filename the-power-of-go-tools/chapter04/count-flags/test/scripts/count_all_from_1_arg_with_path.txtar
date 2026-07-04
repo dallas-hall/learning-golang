@@ -1,0 +1,23 @@
+# Sets the command to run.
+exec count -lines input.txt
+
+# Asserts what stdout will display using regex.
+stdout '^3\n$'
+
+# Tests can be combined.
+exec count --lines input.txt
+stdout '^3\n$'
+
+exec count input.txt
+stdout '^5\n$'
+
+exec count -bytes input.txt
+stdout '^28\n$'
+exec count --bytes input.txt
+stdout '^28\n$'
+
+# Defines our filename and contents.
+-- input.txt --
+this input
+contains
+3 lines
