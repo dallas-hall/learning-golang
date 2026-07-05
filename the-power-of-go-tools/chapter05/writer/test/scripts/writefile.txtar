@@ -1,0 +1,41 @@
+[!exec:fallocate] skip 'Need fallocate for this test'
+
+# With (-s|--size) flag and path, create file with required size
+! exists zeroes-short.dat
+exec writefile -s 1000 zeroes-short.dat
+exec fallocate -l 1000 golden.dat
+cmp zeroes-short.dat golden.dat
+
+! exists zeroes-long.dat
+exec writefile --size 1000 zeroes-long.dat
+exec fallocate -l 1000 golden.dat
+cmp zeroes-long.dat golden.dat
+
+# With (-h|--help) only, show usage
+exec writefile -h
+stdout 'Usage: writefile'
+
+exec writefile --help
+stdout 'Usage: writefile'
+
+# With (-s|--size) only, show usage
+exec writefile -s
+stdout 'Usage: writefile'
+
+exec writefile --size
+stdout 'Usage: writefile'
+
+# With (-s|--size) and int only, show usage
+exec writefile -s 1
+stdout 'Usage: writefile'
+
+exec writefile --size 1
+stdout 'Usage: writefile'
+
+# With path only, show usage
+exec writefile nothing.dat
+stdout 'Usage: writefile'
+
+# With no args, show usage
+exec writefile nothing.dat
+stdout 'Usage: writefile'
