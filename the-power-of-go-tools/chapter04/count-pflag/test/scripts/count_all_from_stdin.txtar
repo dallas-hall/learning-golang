@@ -1,0 +1,31 @@
+# Sets stdin to come from commands run on this file.
+stdin input.txt
+
+# Sets the command to run.
+exec count
+
+# Asserts what stdout will display using regex.
+stdout '^5\n$'
+
+# Multiple tests can be combined.
+stdin input.txt
+exec count --lines
+stdout '^3\n$'
+
+stdin input.txt
+exec count -l
+stdout '^3\n$'
+
+stdin input.txt
+exec count --bytes
+stdout '^28\n$'
+
+stdin input.txt
+exec count -b
+stdout '^28\n$'
+
+# Defines our filename and contents.
+-- input.txt --
+this input
+contains
+3 lines

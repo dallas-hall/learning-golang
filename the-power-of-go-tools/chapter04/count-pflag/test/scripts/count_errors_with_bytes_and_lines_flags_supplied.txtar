@@ -1,0 +1,5 @@
+! exec count --bytes --lines
+stderr 'not both'
+
+! exec count -b -l
+stderr 'not both'
