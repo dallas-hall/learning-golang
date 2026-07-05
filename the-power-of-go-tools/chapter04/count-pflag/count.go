@@ -163,10 +163,11 @@ func Main() {
 	// Adding P enables shorthand args, which isn't available in the standard flag package.
 	lineMode := flag.BoolP("lines", "l", false, "Count lines.")
 	byteMode := flag.BoolP("bytes", "b", false, "Count bytes.")
+	wordMode := flag.BoolP("words", "w", false, "Count words.")
 
 	// Update the -h output.
 	flag.Usage = func() {
-		fmt.Printf("Usage: %s [-l | --lines | -b | --bytes] [files...]\n", os.Args[0])
+		fmt.Printf("Usage: %s [options...] [files...]\n", os.Args[0])
 		fmt.Println("Count words (or lines or bytes) from stdin (or files).")
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
@@ -185,9 +186,11 @@ func Main() {
 	}
 
 	switch {
-	case *lineMode && *byteMode:
-		fmt.Fprintln(os.Stderr, "Please specify either '-l --lines' or '-b --bytes', but not both.")
+	case *wordMode && *lineMode, *wordMode && *byteMode, *lineMode && *byteMode:
+		fmt.Fprintln(os.Stderr, "Please use one option only.")
 		os.Exit(1)
+	case *wordMode:
+		fmt.Println(c.Words())
 	case *lineMode:
 		fmt.Println(c.Lines())
 	case *byteMode:

@@ -1,5 +1,14 @@
-! exec count --bytes --lines
-stderr 'not both'
+! exec count --words --lines
+stderr 'one option only'
+! exec count -w -l
+stderr 'one option only'
 
-! exec count -b -l
-stderr 'not both'
+! exec count --words --bytes
+stderr 'one option only'
+! exec count -w -b
+stderr 'one option only'
+
+! exec count --lines --bytes
+stderr 'one option only'
+! exec count -l -b
+stderr 'one option only'
