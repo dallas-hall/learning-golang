@@ -6,7 +6,7 @@ import (
 )
 
 // We are defining our return variable in the signature.
-// We replaced the string with a filesystem. Before we needed to use os.DirFS() to convert the string to a filesystem..
+// We replaced the string with a filesystem. Before we needed to use os.DirFS() to convert the string to a filesystem.
 func Files(filesystem fs.FS) (goFiles []string) {
 
 	// Walk the filesystem starting at the top, and call our anonymous function to check for .go files.
