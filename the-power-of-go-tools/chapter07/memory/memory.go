@@ -2,6 +2,7 @@ package memory
 
 import (
 	"fmt"
+	"os/exec"
 	"regexp"
 	"strconv"
 )
@@ -39,4 +40,13 @@ func ParseFreeOutput(text string) (Amounts, error) {
 		TotalBytes: total,
 	}, nil
 
+}
+
+func GetFreeOutput() (string, error) {
+	data, err := exec.Command("/usr/bin/free", "-b").CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }
