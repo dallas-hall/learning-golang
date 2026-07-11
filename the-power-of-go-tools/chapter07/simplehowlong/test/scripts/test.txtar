@@ -1,0 +1,6 @@
+# We are expacting exit code 1 and stderr output
+! exec howlong
+stderr 'usage:'
+
+[!windows] exec howlong sleep 0.1
+stdout 'time:'
