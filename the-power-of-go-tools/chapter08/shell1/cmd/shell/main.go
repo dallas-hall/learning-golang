@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"simpleshell"
+	"simpleshell1"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		if line == "exit" {
 			break
 		}
-		cmd, err := simpleshell.CmdFromString(line)
+		cmd, err := simpleshell1.CmdFromString(line)
 		if err != nil {
 			continue
 		}
