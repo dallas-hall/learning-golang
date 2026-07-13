@@ -13,18 +13,19 @@ import (
 
 // This behaviour was taken from count.go - see it for comments.
 type Session struct {
-	Input         io.Reader
-	Output, Error io.Writer
-	DryRun        bool
+	Input              io.Reader
+	Output, Error      io.Writer
+	DryRun, Transcript bool
 }
 
 // This behaviour was taken from count.go - see it for comments.
 func NewSession(i io.Reader, o, e io.Writer) *Session {
 	s := &Session{
-		Input:  i,
-		Output: o,
-		Error:  e,
-		DryRun: false,
+		Input:      i,
+		Output:     o,
+		Error:      e,
+		DryRun:     false,
+		Transcript: false,
 	}
 	return s
 }
@@ -51,9 +52,17 @@ func (s *Session) Run() {
 			fmt.Fprintf(s.Output, "%s\n", line)
 		}
 
+		if s.Transcript {
+			data := []byte(line)
+			err := WriteToFile("test/data/transcript.txt", data)
+			if err != nil {
+				fmt.Fprintln(s.Error, "error saving file: ", err)
+			}
+		}
+
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			fmt.Fprintln(s.Error, "error: ", err)
+			fmt.Fprintln(s.Error, "error getting command output: ", err)
 		}
 		fmt.Fprintf(s.Output, "%s", output)
 		fmt.Fprint(s.Output, prompt)
@@ -89,4 +98,13 @@ func CmdFromString(s string) (*exec.Cmd, error) {
 func Main() {
 	session := NewSession(os.Stdin, os.Stdout, os.Stderr)
 	session.Run()
+}
+
+// Taken from the-power-of-go-tools/chapter05/writer/writer.go - see for comments
+func WriteToFile(path string, data []byte) error {
+	err := os.WriteFile(path, data, 0o600)
+	if err != nil {
+		return err
+	}
+	return os.Chmod(path, 0o600)
 }

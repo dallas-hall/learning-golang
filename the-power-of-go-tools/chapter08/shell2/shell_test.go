@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/rogpeppe/go-internal/testscript"
 )
 
 func TestShell_CmdFromStringReturnsExpectedCommand(t *testing.T) {
@@ -74,7 +75,7 @@ func TestShell_SuccessfullyRunNewShellWithInputPassedToCommandAndCheckOutput(t *
 	}
 }
 
-func TestShell_SuccessfullyRunNewShellWithInputThatisPassedToOutput(t *testing.T) {
+func TestShell_SuccessfullyRunNewShellWithInputThatsPassedToOutput(t *testing.T) {
 	t.Parallel()
 
 	s := "echo 1 2 3"
@@ -93,4 +94,51 @@ func TestShell_SuccessfullyRunNewShellWithInputThatisPassedToOutput(t *testing.T
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
 	}
+}
+
+func TestShell_SuccessfullyRunNewShellWithInputThatsSavedToFile(t *testing.T) {
+	t.Parallel()
+	data := "echo hello world 123"
+	inputBuffer := strings.NewReader(data)
+	outputBuffer := new(bytes.Buffer)
+
+	session := simpleshell2.NewSession(inputBuffer, outputBuffer, io.Discard)
+	session.Transcript = true
+	session.Run()
+
+	path := "test/data/transcript.txt"
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("Failed to open %q because: %s", path, err)
+	}
+
+	want := []byte(data)
+	if !cmp.Equal(want, got) {
+		t.Fatal(cmp.Diff(want, got))
+	}
+
+	// Check permissions are correct. We hardcoded 0600 inside of WriteToFile
+	stat, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	permission := stat.Mode().Perm()
+	if permission != 0o600 {
+		t.Errorf("want: file permission 0o600 & got: file permission 0o%o", permission)
+	}
+}
+
+// Taken from the-power-of-go-tools/chapter04/count-pflag/count_test.go - see for comments
+func Test(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, testscript.Params{
+		Dir: "test/scripts",
+	})
+}
+
+func TestMain(m *testing.M) {
+	testscript.Main(m, map[string]func(){
+		"shell": simpleshell2.Main,
+	})
 }

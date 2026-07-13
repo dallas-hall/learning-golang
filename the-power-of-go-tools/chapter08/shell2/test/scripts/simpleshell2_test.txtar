@@ -1,0 +1,6 @@
+# Sets the command to run.
+exec shell echo hello world 123
+
+# Asserts what stdout will display using regex.
+# Apparently \n isn't matched so we need to use multi-line whitespace matching.
+stdout '^\[@ script-simpleshell2_test\] \$\s+Goodbye'
