@@ -1,9 +1,27 @@
-package pipeline
+package main
 
 import (
 	"io"
+	"log"
 	"os"
 )
+
+func main() {
+	writeBad(os.Stdout)
+	write(os.Stdout)
+
+	path := "test/data/output.txt"
+	file, err := os.Create(path)
+	if err != nil {
+		log.Fatalf("error opening %q: %s", path, err)
+	}
+	defer file.Close()
+
+	err = write(file)
+	if err != nil {
+		log.Fatalf("error writing to %q: %s", path, err)
+	}
+}
 
 // Started with this monster simulating a pipline, e.g. someObject.writeBad().writeBad().writeBad()...
 func writeBad(w io.Writer) error {
@@ -51,9 +69,4 @@ func write(w io.Writer) error {
 	sw.Write(metadata)
 	sw.Write(metadata)
 	return sw.Error
-}
-
-func Main() {
-	writeBad(os.Stdout)
-	write(os.Stdout)
 }

@@ -3,13 +3,14 @@ package pipeline_test
 import (
 	"bytes"
 	"errors"
+	"io"
 	"pipeline"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestWriter_StdoutPrintsToOutput(t *testing.T) {
+func TestPipeline_StdoutPrintsToOutputFromString(t *testing.T) {
 	t.Parallel()
 	want := "Helloworld 123\n"
 	p := pipeline.FromString(want)
@@ -25,7 +26,25 @@ func TestWriter_StdoutPrintsToOutput(t *testing.T) {
 	}
 }
 
-func TestWriter_StdoutFailsGracefullyOnPipelineError(t *testing.T) {
+func TestPipeline_StdoutPrintsToOutputFromFile(t *testing.T) {
+	t.Parallel()
+	want := []byte("Helloworld 123\n")
+
+	p := pipeline.FromFile("test/data/text.txt")
+	if p.Error != nil {
+		t.Fatal(p.Error)
+	}
+	got, err := io.ReadAll(p.Input)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("want %q & got %q", want, got)
+	}
+}
+
+func TestPipeline_StdoutFailsGracefullyOnPipelineError(t *testing.T) {
 	t.Parallel()
 	want := "Helloworld 123\n"
 	p := pipeline.FromString(want)

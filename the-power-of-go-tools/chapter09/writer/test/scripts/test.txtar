@@ -1,0 +1,12 @@
+exec write
+cmp output.txt golden.txt
+cmp output2.txt golden2.txt
+
+-- golden.txt --
+hello from write
+hello from write
+hello from write
+-- golden2.txt --
+hello from writeBad
+hello from writeBad
+hello from writeBad
