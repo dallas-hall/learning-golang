@@ -228,7 +228,7 @@ func TestPipeline_ConcatReturnsCorrectFileContentsUsingDisk(t *testing.T) {
 		t.Fatal(p.Error)
 	}
 
-	// Compare manual concat using strings.Join and p.Concat
+	// Compare concats
 	got, err := io.ReadAll(p.Input)
 	if err != nil {
 		t.Fatal(err)
@@ -426,7 +426,7 @@ func TestPipeline_ConcatReturnsCorrectFileContentsUsingFileSystem(t *testing.T) 
 		t.Fatal(p.Error)
 	}
 
-	// Compare manual concat using strings.Join and p.Concat
+	// Compare concats.
 	got, err := io.ReadAll(p.Input)
 	if err != nil {
 		t.Fatal(err)

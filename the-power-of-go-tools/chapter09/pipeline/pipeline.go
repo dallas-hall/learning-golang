@@ -116,7 +116,7 @@ func (p *Pipeline) Column(column int, delimiter string) *Pipeline {
 		return p
 	}
 	if column < 1 {
-		p.Error = fmt.Errorf("bad column, must be positive: %d\n", column)
+		p.Error = fmt.Errorf("bad column, must be positive: %d", column)
 		return p
 	}
 
