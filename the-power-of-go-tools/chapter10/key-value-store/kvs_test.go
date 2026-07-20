@@ -2,6 +2,7 @@ package keyvaluestore_test
 
 import (
 	"keyvaluestore"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -35,6 +36,57 @@ func TestKvs_OpenStoreReturnsKeyValueStoreCorrectly(t *testing.T) {
 	got = kvs.GetPath()
 	if !cmp.Equal(want, got) {
 		t.Fatalf("want %q path & got %q", want, got)
+	}
+}
+
+// Test OpenStore returns error for filesystem permission denied.
+func TestKvs_OpenStoreReturnsErrorOnPermissionDenied(t *testing.T) {
+	t.Parallel()
+
+	path := t.TempDir() + "/lol.bin"
+
+	_, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = os.Chmod(path, 0o000)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = keyvaluestore.OpenStore(path)
+	if err == nil {
+		t.Fatal("expected error opening kvs and got none")
+	}
+}
+
+// Test OpenStore returns error when using non-GOB data.
+func TestKvs_OpenStoreReturnsErrorOnInvalidData(t *testing.T) {
+	t.Parallel()
+
+	path := "test/data/read-test.json"
+
+	_, err := keyvaluestore.OpenStore(path)
+	if err == nil {
+		t.Fatal("expected error opening kvs and got none")
+	}
+}
+
+// Test OpenStore returns error when saving to unwriteable path.
+func TestKvs_SaveErrorsWhenPathUnwriteable(t *testing.T) {
+	t.Parallel()
+
+	path := t.TempDir() + "fake/path/to/lol.bin"
+
+	kvs, err := keyvaluestore.OpenStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = kvs.Save()
+	if err == nil {
+		t.Fatal("expected error saving kvs and got none")
 	}
 }
 
