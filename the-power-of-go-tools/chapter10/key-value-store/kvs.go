@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 	"strings"
 
@@ -45,13 +46,13 @@ func OpenStore(s string) (*keyValueStore, error) {
 	return kvs, nil
 }
 
-// Return the key/value store's data.
-func (kvs *keyValueStore) GetData() map[string]string {
-	return kvs.data
+// Return a copy of the key/value store's data.
+func (kvs *keyValueStore) Data() map[string]string {
+	return maps.Clone(kvs.data)
 }
 
 // Return the key/value store's path.
-func (kvs *keyValueStore) GetPath() string {
+func (kvs *keyValueStore) Path() string {
 	return kvs.path
 }
 
@@ -61,7 +62,7 @@ func (kvs *keyValueStore) SetPath(p string) {
 }
 
 // Return the length of the key/value store, i.e. how many keys are stored.
-func (kvs *keyValueStore) GetLength() int {
+func (kvs *keyValueStore) Length() int {
 	return len(kvs.data)
 }
 
@@ -99,13 +100,9 @@ func (kvs *keyValueStore) Clear() {
 	clear(kvs.data)
 }
 
-func (kvs *keyValueStore) All() map[string]string {
-	return kvs.data
-}
-
 func Main() {
 	// Taken from the-power-of-go-tools/chapter04/count-pflag/count.go see there for comments.
-	setMode := flag.StringSliceP("set", "s", []string{}, "Add/update a key/value pair with key=value. Flag can be repeated with -a k1=v1,k2=v2 or a -a k1=v1 -a k2=v2.")
+	setMode := flag.StringSliceP("set", "s", []string{}, "Add/update a key/value pair with key=value. Flag can be repeated with -s k1=v1,k2=v2 or -s k1=v1 -s k2=v2.")
 	deleteMode := flag.StringP("delete", "d", "", "Delete a key/value pair.")
 	clearMode := flag.BoolP("clear", "c", false, "Delete all key/value pairs.")
 	getMode := flag.StringP("get", "g", "", "Get value using its key.")
@@ -113,8 +110,8 @@ func Main() {
 
 	// Update the -h output.
 	flag.Usage = func() {
-		fmt.Printf("Usage: %s [options...] [files...]\n", os.Args[0])
-		fmt.Println("Count words (or lines or bytes) from stdin (or files).")
+		fmt.Printf("Usage: %s option\n", os.Args[0])
+		fmt.Println("Create and manipulate a key/value store.")
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
 	}
@@ -132,6 +129,7 @@ func Main() {
 		log.Fatal(err)
 	}
 
+	var save bool
 	switch {
 	case len(*setMode) > 0:
 		for _, kv := range *setMode {
@@ -141,23 +139,30 @@ func Main() {
 			}
 			kvs.Set(k, v)
 		}
+		save = true
 	case *deleteMode != "":
 		kvs.Delete(*deleteMode)
+		save = true
 	case *clearMode:
 		kvs.Clear()
+		save = true
 	case *getMode != "":
 		v, ok := kvs.Get(*getMode)
 		if !ok {
-			fmt.Printf("key %q not found", *getMode)
+			fmt.Printf("key %q not found\n", *getMode)
+			return
 		}
 		fmt.Println(v)
 	case *allMode:
-		fmt.Println(kvs.All())
+		fmt.Println(kvs.Data())
 	default:
 		flag.Usage()
 	}
-	err = kvs.Save()
-	if err != nil {
-		log.Fatalf("could not save kvs because %s", err)
+	if save {
+		err = kvs.Save()
+		if err != nil {
+			log.Fatalf("could not save kvs because %s", err)
+		}
 	}
+
 }

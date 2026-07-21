@@ -23,19 +23,19 @@ func TestKvs_OpenStoreReturnsKeyValueStoreCorrectly(t *testing.T) {
 	}
 
 	want := path
-	got := kvs.GetPath()
+	got := kvs.Path()
 	if !cmp.Equal(want, got) {
 		t.Fatalf("want %q path & got %q", want, got)
 	}
 
-	length := kvs.GetLength()
+	length := kvs.Length()
 	if length != 0 {
 		t.Fatalf("want 0 lenght & got %d", length)
 	}
 
 	want = "test/data/wheelie.bin"
 	kvs.SetPath(want)
-	got = kvs.GetPath()
+	got = kvs.Path()
 	if !cmp.Equal(want, got) {
 		t.Fatalf("want %q path & got %q", want, got)
 	}
@@ -79,7 +79,7 @@ func TestKvs_OpenStoreReturnsErrorOnInvalidData(t *testing.T) {
 func TestKvs_SaveErrorsWhenPathUnwriteable(t *testing.T) {
 	t.Parallel()
 
-	path := t.TempDir() + "fake/path/to/lol.bin"
+	path := t.TempDir() + "/fake/path/to/lol.bin"
 
 	kvs, err := keyvaluestore.OpenStore(path)
 	if err != nil {
@@ -185,7 +185,7 @@ func TestKvs_SaveAndOpenWorksCorrectly(t *testing.T) {
 	}
 
 	// Compare the 2 kvs's, they should match.
-	if diff := cmp.Diff(kvs1.GetData(), kvs2.GetData()); diff != "" {
+	if diff := cmp.Diff(kvs1.Data(), kvs2.Data()); diff != "" {
 		t.Errorf("mismatch (-kvs1 +kvs2):\n%s", diff)
 	}
 }
