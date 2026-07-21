@@ -20,7 +20,10 @@ type keyValueStore struct {
 	path string
 }
 
-// Create a new key/value store.
+// Create a new key/value store. This type is unexported so you must use this
+// constructor to get a keyValueStore with sane defaults. The fields are
+// unexported too, so you must use the exported methods (e.g. SetPath, Set)
+// This is trying to ake illegal states unreachable through this type system.
 // Taken from the-deeper-love-of-go/chapter13/books.go OpenCatalogue() - see for comments
 func OpenStore(s string) (*keyValueStore, error) {
 	kvs := &keyValueStore{
