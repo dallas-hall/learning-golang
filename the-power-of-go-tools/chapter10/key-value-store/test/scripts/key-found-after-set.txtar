@@ -1,0 +1,13 @@
+# Testing add
+exec kvs -s key=value
+stdout '^$'
+
+exec kvs -g key
+stdout '^value$'
+
+# Testing update
+exec kvs --set key=VALUE
+stdout '^$'
+
+exec kvs --get key
+stdout '^VALUE$'

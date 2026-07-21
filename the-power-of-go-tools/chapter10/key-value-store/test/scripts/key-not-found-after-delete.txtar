@@ -1,0 +1,17 @@
+exec kvs -s key=value
+stdout '^$'
+
+exec kvs -g key
+stdout '^value$'
+
+exec kvs -c
+stdout '^$'
+
+exec kvs --set key=value
+stdout '^$'
+
+exec kvs --get key
+stdout '^value$'
+
+exec kvs --clear
+stdout '^$'

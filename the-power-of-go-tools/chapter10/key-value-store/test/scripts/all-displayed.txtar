@@ -1,0 +1,32 @@
+exec kvs -s a=A,b=B,c=C
+stdout '^$'
+
+exec kvs -g a
+stdout '^A$'
+
+exec kvs -g b
+stdout '^B$'
+
+exec kvs -g c
+stdout '^C$'
+
+exec kvs -a
+stdout '^map\[a:A b:B c:C\]$'
+
+exec kvs --clear
+stdout '^$'
+
+exec kvs --set a=A,b=B,c=C
+stdout '^$'
+
+exec kvs --get a
+stdout '^A$'
+
+exec kvs --get b
+stdout '^B$'
+
+exec kvs --get c
+stdout '^C$'
+
+exec kvs --all
+stdout '^map\[a:A b:B c:C\]$'

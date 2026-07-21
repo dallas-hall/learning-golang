@@ -3,9 +3,11 @@ package keyvaluestore_test
 import (
 	"keyvaluestore"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/rogpeppe/go-internal/testscript"
 )
 
 // Tests if the constructor for creating a key/value store is working. It also
@@ -186,4 +188,24 @@ func TestKvs_SaveAndOpenWorksCorrectly(t *testing.T) {
 	if diff := cmp.Diff(kvs1.GetData(), kvs2.GetData()); diff != "" {
 		t.Errorf("mismatch (-kvs1 +kvs2):\n%s", diff)
 	}
+}
+
+// Taken from the-power-of-go-tools/chapter04/count-pflag/count_test.go - see for comments
+func Test(t *testing.T) {
+	t.Parallel()
+	testscript.Run(t, testscript.Params{
+		Dir: "test/scripts",
+		// This is needed since Open/Save do not create new folders.
+		Setup: func(env *testscript.Env) error {
+			env.Setenv("KVS_PATH", filepath.Join(env.WorkDir, "data.bin"))
+			return nil
+		},
+	})
+}
+
+// Taken from the-power-of-go-tools/chapter04/count-pflag/count_test.go - see for comments
+func TestMain(m *testing.M) {
+	testscript.Main(m, map[string]func(){
+		"kvs": keyvaluestore.Main,
+	})
 }
