@@ -12,7 +12,7 @@ import (
 
 // Tests if the constructor for creating a key/value store is working. It also
 // tests GetPath(), SetPath(), and GetDataLength().
-func TestKvs_OpenStoreReturnsKeyValueStoreCorrectly(t *testing.T) {
+func Test_OpenStoreReturnsStoreCorrectly(t *testing.T) {
 	t.Parallel()
 
 	path := t.TempDir() + "/lol.bin"
@@ -42,7 +42,7 @@ func TestKvs_OpenStoreReturnsKeyValueStoreCorrectly(t *testing.T) {
 }
 
 // Test OpenStore returns error for filesystem permission denied.
-func TestKvs_OpenStoreReturnsErrorOnPermissionDenied(t *testing.T) {
+func Test_OpenStoreReturnsErrorOnPermissionDenied(t *testing.T) {
 	t.Parallel()
 
 	path := t.TempDir() + "/lol.bin"
@@ -64,7 +64,7 @@ func TestKvs_OpenStoreReturnsErrorOnPermissionDenied(t *testing.T) {
 }
 
 // Test OpenStore returns error when using non-GOB data.
-func TestKvs_OpenStoreReturnsErrorOnInvalidData(t *testing.T) {
+func Test_OpenStoreReturnsErrorOnInvalidData(t *testing.T) {
 	t.Parallel()
 
 	path := "test/data/read-test.json"
@@ -76,7 +76,7 @@ func TestKvs_OpenStoreReturnsErrorOnInvalidData(t *testing.T) {
 }
 
 // Test OpenStore returns error when saving to unwriteable path.
-func TestKvs_SaveErrorsWhenPathUnwriteable(t *testing.T) {
+func Test_SaveErrorsWhenPathUnwriteable(t *testing.T) {
 	t.Parallel()
 
 	path := t.TempDir() + "/fake/path/to/lol.bin"
@@ -93,7 +93,7 @@ func TestKvs_SaveErrorsWhenPathUnwriteable(t *testing.T) {
 }
 
 // Test when a searched kv pair exists and returns value.
-func TestKvs_SetValueAndGetValueAndOkWhenExists(t *testing.T) {
+func Test_SetandGetNewValueWork(t *testing.T) {
 	t.Parallel()
 
 	path := "test/data/read-test.bin"
@@ -116,7 +116,7 @@ func TestKvs_SetValueAndGetValueAndOkWhenExists(t *testing.T) {
 }
 
 // Test overriding an existing kv pair and returning the updated value.
-func TestKvs_SetAndGetUpdatedValueAndOkCorrectly(t *testing.T) {
+func Test_SetAndGetUpdatedValueWork(t *testing.T) {
 	t.Parallel()
 
 	path := "test/data/read-test.bin"
@@ -139,7 +139,7 @@ func TestKvs_SetAndGetUpdatedValueAndOkCorrectly(t *testing.T) {
 }
 
 // Test when a searched kv pair doesn't exist.
-func TestKvs_GetNothingAndNotOkWhenDoesntExist(t *testing.T) {
+func Test_EmptyStringAndNotOkReturnedWhenDoesNotExist(t *testing.T) {
 	t.Parallel()
 
 	path := "test/data/read-test.bin"
@@ -159,7 +159,7 @@ func TestKvs_GetNothingAndNotOkWhenDoesntExist(t *testing.T) {
 	}
 }
 
-func TestKvs_SaveAndOpenWorksCorrectly(t *testing.T) {
+func Test_OpenStoreAddEntriesAndSaveStoreWorks(t *testing.T) {
 	t.Parallel()
 
 	path := t.TempDir() + "write-test.bin"
