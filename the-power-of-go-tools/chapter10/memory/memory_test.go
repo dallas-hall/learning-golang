@@ -92,4 +92,35 @@ func TestMomory_ToJSONWorksCorrectly(t *testing.T) {
 
 func TestMemory_ToYAMLWorksCorrectly(t *testing.T) {
 	t.Parallel()
+
+	// Read our test data
+	path := "test/data/free.txt"
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("Failed to open %q because: %s", path, err)
+	}
+
+	// Parse test data into struct
+	ramTotals, err := memory.ParseFreeOutput(string(data))
+	if err != nil {
+		t.Fatalf("Failed to parse `free` output because: %s", err)
+	}
+	myMemory := memory.New()
+	myMemory.Physical = ramTotals
+
+	// Convert struct to JSON
+	got := myMemory.ToYAML()
+
+	// Read in test YAML file
+	path = "test/data/free-parsed.yaml"
+	data, err = os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("Failed to open %q because: %s", path, err)
+	}
+	want := string(data)
+
+	// Compare
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
 }

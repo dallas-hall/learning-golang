@@ -1,21 +1,24 @@
 package memory
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os/exec"
 	"regexp"
 	"strconv"
+
+	"go.yaml.in/yaml/v3"
 )
 
 type Memory struct {
-	Physical Amounts
+	Physical Amounts `yaml:"Physical" json:"Physical"`
 }
 
 type Amounts struct {
-	TotalBytes int
-	UsedBytes  int
-	FreeBytes  int
+	TotalBytes int `yaml:"TotalBytes" json:"TotalBytes"`
+	UsedBytes  int `yaml:"UsedBytes" json:"UsedBytes"`
+	FreeBytes  int `yaml:"FreeBytes" json:"FreeBytes"`
 }
 
 func New() *Memory {
@@ -28,6 +31,7 @@ func New() *Memory {
 // Using a `raw string` so we don't have to double escape.
 var freeMemRegex = regexp.MustCompile(`Mem:\s+(\d+)\s+(\d+)\s+(\d+) .*`)
 
+// Accepts a string and uses a hardcoded regex to parse the output of `free -b“
 func ParseFreeOutput(text string) (Amounts, error) {
 	// FindString finds first string that matches this
 	// FindStringSubmatch returns the entire matched string and the contents of the capture group
@@ -70,6 +74,8 @@ func GetFreeOutput() (string, error) {
 	return string(data), nil
 }
 
+// Returns a string of the Memory struct in JSON.
+// Panics if invalid input.
 func (m *Memory) ToJSON() string {
 	// No prefix and indent 2 spaces.
 	data, err := json.MarshalIndent(m, "", "  ")
@@ -79,4 +85,20 @@ func (m *Memory) ToJSON() string {
 	}
 	return string(data)
 
+}
+
+// Returns a string of the Memory struct in YAML.
+// Panics if invalid input.
+func (m *Memory) ToYAML() string {
+	var buffer bytes.Buffer
+
+	encoder := yaml.NewEncoder(&buffer)
+	encoder.SetIndent(2)
+
+	err := encoder.Encode(m)
+	if err != nil {
+		panic(err)
+	}
+
+	return buffer.String()
 }
