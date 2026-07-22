@@ -1,0 +1,5 @@
+! exec owm -c Brisbane -C AT
+stderr $OWM_404_ERROR
+
+! exec owm --city Brisbane --country-code AT
+stderr $OWM_404_ERROR

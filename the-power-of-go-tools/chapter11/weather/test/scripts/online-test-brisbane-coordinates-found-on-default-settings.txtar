@@ -1,0 +1,2 @@
+exec owm
+stdout $BRISBANE_COORDS

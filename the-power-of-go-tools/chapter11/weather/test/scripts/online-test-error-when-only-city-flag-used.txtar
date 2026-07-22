@@ -1,0 +1,5 @@
+! exec owm -c Brisbane
+stderr $OWM_PFLAG_ERROR
+
+! exec owm --city Brisbane
+stderr $OWM_PFLAG_ERROR
