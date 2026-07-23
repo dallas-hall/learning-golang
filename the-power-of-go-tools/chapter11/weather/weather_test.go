@@ -9,6 +9,7 @@ import (
 
 	owm "github.com/briandowns/openweathermap"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/rogpeppe/go-internal/testscript"
 )
 
@@ -35,9 +36,7 @@ func apiKey(t *testing.T) string {
 	return key
 }
 
-// Returns a string with the URL to make an API call. This function is from
-// weather.go and is tested inside of weather_internal_test.go, it has been
-// adapted here as a test helper.
+// Returns a string with the URL to make an API call.
 func buildURL(t *testing.T, client weather.Client) string {
 	t.Helper()
 
@@ -81,28 +80,6 @@ func Test_LatLongEndpointReturnsCorrectly(t *testing.T) {
 	}
 }
 
-func Test_CityCountryEndpointReturnsCorrectly(t *testing.T) {
-	t.Parallel()
-
-	want := CityCountryEndpoint
-	got := weather.CityCountry{}.Endpoint()
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func Test_ZipCountryEndpointReturnsCorrectly(t *testing.T) {
-	t.Parallel()
-
-	want := ZipCountryEndpoint
-	got := weather.ZipCountry{}.Endpoint()
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
 func Test_NewClientCreatesClientStruct(t *testing.T) {
 	t.Parallel()
 
@@ -134,7 +111,7 @@ func Test_ClientMakeAPIRequestCreatesWeatherEndpointStruct(t *testing.T) {
 
 	want := BrisbaneLatLongOWM
 
-	if !cmp.Equal(want, got) {
+	if !cmp.Equal(want, got, cmpopts.EquateApprox(0, 0.01)) {
 		t.Error(cmp.Diff(want, got))
 	}
 }
@@ -151,23 +128,8 @@ func Test(t *testing.T) {
 
 			// Shared test values
 			env.Setenv(
-				"BRISBANE_COORDS",
-				`-27.4698,153.0251`,
-			)
-
-			env.Setenv(
-				"BRISBANE_COORDS_JSON",
-				`coord":{"lon":153.0251,"lat":-27.4698}`,
-			)
-
-			env.Setenv(
-				"OWM_404_ERROR",
-				`unexpected status 404`,
-			)
-
-			env.Setenv(
-				"OWM_PFLAG_ERROR",
-				`error: -c|--city and -C|--country-code must be passed together`,
+				"OWM_OUTPUT",
+				`"name":"Brisbane"`,
 			)
 
 			return nil

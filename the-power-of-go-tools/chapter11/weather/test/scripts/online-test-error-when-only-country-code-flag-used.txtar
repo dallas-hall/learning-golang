@@ -1,5 +1,0 @@
-! exec owm -C AU
-stderr $OWM_PFLAG_ERROR
-
-! exec owm --country-code AU
-stderr $OWM_PFLAG_ERROR

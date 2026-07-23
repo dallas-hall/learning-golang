@@ -27,7 +27,10 @@ type Client struct {
 	Location LocationQuery
 }
 
-// The client needs a general interface for all location API calls it can make
+// The client needs a general interface for all location API calls it can make.
+// We did this so we could handle Lat/Long, City/Country, Zip/Country. But the
+// last 2 were removed due to complexity and I couldn't be fucked spending more
+// time on this exercise which turned into a mini project. LOL.
 type LocationQuery interface {
 	QueryValues() map[string]string
 	Endpoint() string
@@ -76,80 +79,6 @@ func (l LatLong) QueryValues() map[string]string {
 
 func (l LatLong) Endpoint() string {
 	return "/data/2.5/weather"
-}
-
-type CityCountry struct {
-	City, CountryCode string
-}
-
-func ParseCityCountry(s string) (CityCountry, error) {
-	parts := strings.Split(s, ",")
-	if len(parts) != 2 {
-		return CityCountry{}, fmt.Errorf("expected city,country format, got %q", s)
-	}
-	return NewCityCountry(parts[0], parts[1])
-}
-
-func NewCityCountry(city, countryCode string) (CityCountry, error) {
-	if city == "" || countryCode == "" {
-		return CityCountry{}, fmt.Errorf("city and country code cannot be empty")
-	}
-	err := validateCountryCode(countryCode)
-	if err != nil {
-		return CityCountry{}, err
-	}
-	return CityCountry{City: city, CountryCode: countryCode}, nil
-}
-
-func (c CityCountry) QueryValues() map[string]string {
-	return map[string]string{
-		"q": fmt.Sprintf("%s,%s", c.City, c.CountryCode),
-	}
-}
-
-func (c CityCountry) Endpoint() string {
-	return "/geo/1.0/direct"
-}
-
-type ZipCountry struct {
-	ZipCode, CountryCode string
-}
-
-func ParseZipCountry(s string) (ZipCountry, error) {
-	parts := strings.Split(s, ",")
-	if len(parts) != 2 {
-		return ZipCountry{}, fmt.Errorf("expected zip,country format, got %q", s)
-	}
-	return NewZipCountry(parts[0], parts[1])
-}
-
-func NewZipCountry(zipCode, countryCode string) (ZipCountry, error) {
-	if zipCode == "" || countryCode == "" {
-		return ZipCountry{}, fmt.Errorf("zip and country code cannot be empty")
-	}
-	err := validateCountryCode(countryCode)
-	if err != nil {
-		return ZipCountry{}, err
-	}
-	return ZipCountry{ZipCode: zipCode, CountryCode: countryCode}, nil
-}
-
-func (z ZipCountry) QueryValues() map[string]string {
-	return map[string]string{
-		"zip": fmt.Sprintf("%s,%s", z.ZipCode, z.CountryCode),
-	}
-}
-
-func (z ZipCountry) Endpoint() string {
-	return "/geo/1.0/zip"
-}
-
-func validateCountryCode(countryCode string) error {
-	// Basic checking
-	if len(countryCode) < 2 || len(countryCode) > 3 {
-		return fmt.Errorf("must be ISO 3166 country code")
-	}
-	return nil
 }
 
 // Create a new client with the supplied URL.
@@ -241,23 +170,11 @@ func APIKey() (string, error) {
 
 func Main() {
 	// Taken from the-power-of-go-tools/chapter04/count-pflag/count.go see there for comments.
-	latlongFlag := flag.StringP(
+	latLongFlag := flag.StringP(
 		"lat-long",
 		"l",
-		"-27.4679,153.0281",
+		"-27.4698,153.0251",
 		"Search using latitude and longitude delimited by comma, eg -27.4698,153.0251",
-	)
-	cityFlag := flag.StringP(
-		"city-state-country",
-		"c",
-		"Brisbane,QLD,AU",
-		"Get latitude and longitude by city and country code. eg Brisbane,AU",
-	)
-	zipFlag := flag.StringP(
-		"zip-country",
-		"z",
-		"4000,AU",
-		"Get latitude and longitude by zip code and country code. eg 4000,AU",
 	)
 
 	// Update the -h output.
@@ -272,22 +189,6 @@ func Main() {
 	// This stops parsing as soon as it see a non-flag arg.
 	flag.Parse()
 
-	// Forcing mutual exclusion as pflag doesn't offer that. cobra does though.
-	flags := []string{"lat-long", "city-state-country", "zip-country"}
-	changed := 0
-	for _, name := range flags {
-		if flag.Lookup(name).Changed {
-			changed++
-		}
-	}
-	if changed < 1 {
-		flag.Usage()
-		os.Exit(0)
-	}
-	if changed > 1 {
-		log.Fatal("error: { -l | -c | -z } options are mutually exclusive")
-	}
-
 	// Configure client
 	key, err := APIKey()
 	if err != nil {
@@ -295,30 +196,15 @@ func Main() {
 	}
 	client := NewClient(key)
 
-	// Make API calls
-	switch {
-	case flag.Lookup(flags[0]).Changed:
-		client.Location, err = ParseLatLong(*latlongFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
-	case flag.Lookup(flags[1]).Changed:
-		fmt.Println(*cityFlag)
-		client.Location, err = ParseCityCountry(*cityFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
-	case flag.Lookup(flags[2]).Changed:
-		fmt.Println(*zipFlag)
-		client.Location, err = ParseZipCountry(*zipFlag)
-		if err != nil {
-			log.Fatal(err)
-		}
+	// Make API call
+	client.Location, err = ParseLatLong(*latLongFlag)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var weather WeatherEndpoint
 	url := client.BuildURL()
-	fmt.Println(url)
+
 	err = client.MakeAPIRequest(url, &weather)
 	if err != nil {
 		log.Fatal(err)

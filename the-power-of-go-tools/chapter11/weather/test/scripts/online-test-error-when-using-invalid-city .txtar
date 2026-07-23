@@ -1,5 +1,0 @@
-! exec owm -c BrisVegas -C AU
-stderr $OWM_404_ERROR
-
-! exec owm --city BrisVegas --country-code AU
-stderr $OWM_404_ERROR
