@@ -12,9 +12,16 @@ import (
 	"github.com/rogpeppe/go-internal/testscript"
 )
 
-const city = "Brisbane"
-const countryCode = "AU"
-const BaseURL = "https://api.openweathermap.org"
+var BrisbaneLatLong = weather.LatLong{Lat: -27.4698, Long: 153.0251}
+var BrisbaneLatLongOWM = owm.Coordinates{
+	Longitude: 153.0251,
+	Latitude:  -27.4698,
+}
+
+const BaseURL string = "https://api.openweathermap.org"
+const LatLongEndpoint string = "/data/2.5/weather"
+const CityCountryEndpoint string = "/geo/1.0/direct"
+const ZipCountryEndpoint string = "/geo/1.0/zip"
 
 // Returns the API key associated with environment variable OWM_API_KEY.
 func apiKey(t *testing.T) string {
@@ -28,25 +35,71 @@ func apiKey(t *testing.T) string {
 	return key
 }
 
-// Returns the query parameters.
-func queryParameters(t *testing.T) string {
+// Returns a string with the URL to make an API call. This function is from
+// weather.go and is tested inside of weather_internal_test.go, it has been
+// adapted here as a test helper.
+func buildURL(t *testing.T, client weather.Client) string {
 	t.Helper()
 
-	// Create proper URL query parameters.
 	parameters := url.Values{}
-	parameters.Set("q", city+","+countryCode)
-	parameters.Set("appid", apiKey(t))
+	for key, value := range client.Location.QueryValues() {
+		parameters.Set(key, value)
+	}
+	parameters.Set("appid", client.Key)
 
-	return parameters.Encode()
+	return fmt.Sprintf(
+		"%s%s?%s",
+		BaseURL,
+		client.Location.Endpoint(),
+		parameters.Encode(),
+	)
 }
 
-// Returns the long/lat coordinates of Brisbane.
-func coordinates(t *testing.T) owm.Coordinates {
-	t.Helper()
+func Test_ClientBuildURLWorks(t *testing.T) {
+	t.Parallel()
 
-	return owm.Coordinates{
-		Longitude: 153.0281,
-		Latitude:  -27.4679,
+	client := weather.Client{
+		Key:      apiKey(t),
+		Location: BrisbaneLatLong,
+	}
+	got := client.BuildURL()
+	want := buildURL(t, client)
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_LatLongEndpointReturnsCorrectly(t *testing.T) {
+	t.Parallel()
+
+	want := LatLongEndpoint
+	got := weather.LatLong{}.Endpoint()
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_CityCountryEndpointReturnsCorrectly(t *testing.T) {
+	t.Parallel()
+
+	want := CityCountryEndpoint
+	got := weather.CityCountry{}.Endpoint()
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_ZipCountryEndpointReturnsCorrectly(t *testing.T) {
+	t.Parallel()
+
+	want := ZipCountryEndpoint
+	got := weather.ZipCountry{}.Endpoint()
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
 	}
 }
 
@@ -54,80 +107,9 @@ func Test_NewClientCreatesClientStruct(t *testing.T) {
 	t.Parallel()
 
 	client := weather.NewClient(apiKey(t))
-	got := client.APIKey()
+	got := client.Key
 
 	want := apiKey(t)
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func Test_ClientSetAndGetCityWorks(t *testing.T) {
-	t.Parallel()
-
-	city := "Brisbane"
-	client := weather.NewClient(apiKey(t))
-	client.SetCity(city)
-	got := client.City()
-
-	want := city
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func Test_ClientSetAndGetCountryCodeWorks(t *testing.T) {
-	t.Parallel()
-
-	countryCode := "AU"
-	client := weather.NewClient(apiKey(t))
-	client.SetCountryCode(countryCode)
-	got := client.CountryCode()
-
-	want := countryCode
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func Test_ClientSetAndGetAPIKeyWorks(t *testing.T) {
-	t.Parallel()
-
-	key := "123THISISMYAPIKEY"
-	client := weather.NewClient(apiKey(t))
-	client.SetAPIKey(key)
-	got := client.APIKey()
-
-	want := key
-
-	if !cmp.Equal(want, got) {
-		t.Error(cmp.Diff(want, got))
-	}
-}
-
-func Test_ClientFormatWeatherURLWorks(t *testing.T) {
-	t.Parallel()
-
-	key := apiKey(t)
-	client := weather.NewClient(key)
-
-	got := fmt.Sprintf(
-		"%s/data/2.5/weather?appid=%s&q=%s",
-		BaseURL,
-		client.APIKey(),
-		// Avoids hardcoding %2C for URL encoded comma
-		url.QueryEscape(city+","+countryCode),
-	)
-
-	parameters := queryParameters(t)
-	want := fmt.Sprintf(
-		"%s/data/2.5/weather?%s",
-		BaseURL,
-		parameters,
-	)
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -137,21 +119,20 @@ func Test_ClientFormatWeatherURLWorks(t *testing.T) {
 func Test_ClientMakeAPIRequestCreatesWeatherEndpointStruct(t *testing.T) {
 	t.Parallel()
 
-	endpoint := "weather"
 	client := weather.NewClient(apiKey(t))
 	// Need to manually set as we aren't running with command line which injects
 	// defaults.
-	client.SetCity(city)
-	client.SetCountryCode(countryCode)
+	client.Location = weather.LatLong{Lat: -27.4679, Long: 153.0281}
 
+	url := buildURL(t, *client)
 	var weather weather.WeatherEndpoint
-	err := client.MakeAPIRequest(endpoint, &weather)
+	err := client.MakeAPIRequest(url, &weather)
 	if err != nil {
 		t.Errorf("error calling MakeAPIRequest: %s", err)
 	}
 	got := weather.Coordinates
 
-	want := coordinates(t)
+	want := BrisbaneLatLongOWM
 
 	if !cmp.Equal(want, got) {
 		t.Error(cmp.Diff(want, got))
@@ -171,7 +152,12 @@ func Test(t *testing.T) {
 			// Shared test values
 			env.Setenv(
 				"BRISBANE_COORDS",
-				`coord":{"lon":153.0281,"lat":-27.4679}`,
+				`-27.4698,153.0251`,
+			)
+
+			env.Setenv(
+				"BRISBANE_COORDS_JSON",
+				`coord":{"lon":153.0251,"lat":-27.4698}`,
 			)
 
 			env.Setenv(

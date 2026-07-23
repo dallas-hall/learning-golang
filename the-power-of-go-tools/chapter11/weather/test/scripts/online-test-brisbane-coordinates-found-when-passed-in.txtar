@@ -1,5 +1,5 @@
 exec owm -c Brisbane -C AU
-stdout $BRISBANE_COORDS
+stdout $BRISBANE_COORDS_JSON
 
 exec owm --city Brisbane --country-code AU
-stdout $BRISBANE_COORDS
+stdout $BRISBANE_COORDS_JSON

@@ -1,2 +1,2 @@
 exec owm
-stdout $BRISBANE_COORDS
+stdout $BRISBANE_COORDS_JSON
