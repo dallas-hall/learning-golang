@@ -36,14 +36,14 @@ const BaseURL = "https://api.openweathermap.org"
 const DataAPI = "/data/2.5/weather?"
 const GeoAPI = "/geo/1.0/direct?"
 const BrisbaneLocation = "Brisbane,AU"
-const BrisbaneLatitude = "-27.4651"
-const BrisbaneLongitude = "153.0231"
+const BrisbaneLatitude float64 = -27.4689682
+const BrisbaneLongitude float64 = 153.0234991
 
 // Returns the API key associated with environment variable OWM_API_KEY.
 func APIKey() (string, error) {
 	key := os.Getenv("OWM_API_KEY")
 	if key == "" {
-		msg := "error: environment variable OWM_API_KEY is not set"
+		msg := "environment variable OWM_API_KEY is not set"
 		return "", errors.New(msg)
 	}
 	return key, nil
@@ -55,7 +55,7 @@ func ParseDataAPIResponse(data []byte) (Conditions, error) {
 	var response OWMDataAPIResponse
 	err := json.Unmarshal(data, &response)
 	if err != nil {
-		return Conditions{}, fmt.Errorf("invalid API response %s: %w", data, err)
+		return Conditions{}, fmt.Errorf("invalid API response %s with %w", data, err)
 	}
 	if len(response.Weather) > 1 {
 		return Conditions{}, fmt.Errorf("invalid API response %s needs one Weather element", data)
@@ -81,10 +81,14 @@ func FormatURL(api string, args map[string]string) string {
 // Reads a []byte as JSON in the OWNGeoResponse. Tries to find the correct
 // location.
 func ParseGeoAPIResponse(location string, data []byte) (OWMGeoAPIResponse, error) {
+	if !strings.Contains(location, ",") {
+		return OWMGeoAPIResponse{}, fmt.Errorf("invalid location %q must be %q", location, "City,CountryCode")
+	}
+
 	var responses []OWMGeoAPIResponse
 	err := json.Unmarshal(data, &responses)
 	if err != nil {
-		return OWMGeoAPIResponse{}, fmt.Errorf("invalid API response %s: %w", data, err)
+		return OWMGeoAPIResponse{}, fmt.Errorf("invalid API response %s with %w", data, err)
 	}
 	if len(responses) < 1 {
 		return OWMGeoAPIResponse{}, fmt.Errorf("invalid API response %s needs one element", data)
@@ -106,7 +110,7 @@ func ParseGeoAPIResponse(location string, data []byte) (OWMGeoAPIResponse, error
 
 func ValidateGeoAPIResponse(data []byte, response OWMGeoAPIResponse) error {
 	if response.Name == "" {
-		return fmt.Errorf("invalid API data for name: %s", response.Name)
+		return fmt.Errorf("invalid API data for name: %q", response.Name)
 	}
 	if response.Lat < -90 || response.Lat > 90 {
 		return fmt.Errorf("invalid API response %s: latitude %v out of range", data, response.Lat)

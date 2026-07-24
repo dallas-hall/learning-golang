@@ -1,0 +1,34 @@
+[
+  {
+    "name": "City of Brisbane",
+    "local_names": {
+      "sr": "Бризбејн",
+      "mi": "Piripane",
+      "en": "City of Brisbane",
+      "mr": "ब्रिसबेन",
+      "bn": "ব্রিসবেন",
+      "ru": "Брисбен",
+      "bg": "Брисбейн",
+      "fr": "Brisbane",
+      "es": "Brisbane",
+      "de": "Brisbane",
+      "mk": "Бризбејн",
+      "be": "Брысбэн",
+      "ja": "ブリスベン",
+      "pt": "Brisbane",
+      "eo": "Brisbano",
+      "he": "בריסביין",
+      "oc": "Brisbane",
+      "zh": "布里斯班",
+      "is": "Brisbane",
+      "ar": "بريزبان",
+      "lt": "Brisbenas",
+      "sv": "Brisbane",
+      "uk": "Брісбен"
+    },
+    "lat": -27.4689682,
+    "lon": 153.0234991,
+    "country": "AU",
+    "state": "Queensland"
+  }
+]
