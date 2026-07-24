@@ -1,0 +1,38 @@
+coord:
+  lon: 153.0251
+  lat: -27.4698
+weather:
+  - id: 800
+    main: Clear
+    description: clear sky
+    icon: 01d
+base: stations
+main:
+  temp: 293.79
+  temp_min: 291.9
+  temp_max: 295.36
+  feels_like: 293.69
+  pressure: 1018
+  sea_level: 1018
+  grnd_level: 1013
+  humidity: 68
+visibility: 10000
+wind:
+  speed: 0.45
+  deg: 318
+clouds:
+  all: 5
+rain: {}
+snow: {}
+dt: 1784788581
+sys:
+  type: 2
+  id: 2005393
+  message: 0
+  country: AU
+  sunrise: 1784752451
+  sunset: 1784790852
+timezone: 36000
+id: 2174003
+name: Brisbane
+cod: 200
