@@ -1,6 +1,8 @@
 package weather_test
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"strings"
@@ -8,7 +10,10 @@ import (
 	"weather"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
+
+const fakeKey = "123-MY-FAKE-KEY"
 
 func Test_APIKeyReturnsCorrectly(t *testing.T) {
 	want := "737"
@@ -18,7 +23,7 @@ func Test_APIKeyReturnsCorrectly(t *testing.T) {
 	}
 
 	if !strings.Contains(got, want) {
-		t.Fatalf("%q not found in %q", want, got)
+		t.Errorf("%q not found in %q", want, got)
 	}
 }
 
@@ -31,11 +36,13 @@ func Test_ParseDataAPIResponseReturnsGoStruct(t *testing.T) {
 	}
 	got, err := weather.ParseDataAPIResponse(data)
 	if err != nil {
-
+		t.Fatal(err)
 	}
 
 	want := weather.Conditions{
-		Summary: "Clear",
+		Summary:     "Clear",
+		Temperature: 293.79,
+		FeelsLike:   293.69,
 	}
 
 	if !cmp.Equal(want, got) {
@@ -52,18 +59,18 @@ func Test_ParseGeoAPIResponseReturnsGoStruct(t *testing.T) {
 	}
 	got, err := weather.ParseGeoAPIResponse(weather.BrisbaneLocation, data)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	want := weather.OWMGeoAPIResponse{
-		Name:    "City of Brisbane",
-		Country: "AU",
-		Lat:     weather.BrisbaneLatitude,
-		Lon:     weather.BrisbaneLongitude,
+		Name:      "City of Brisbane",
+		Country:   "AU",
+		Latitude:  weather.BrisbaneLatitude,
+		Longitude: weather.BrisbaneLongitude,
 	}
 
 	if !cmp.Equal(want, got) {
-		t.Fatal(cmp.Diff(want, got))
+		t.Error(cmp.Diff(want, got))
 	}
 
 }
@@ -73,7 +80,7 @@ func Test_ParseDataAPIResponseReturnsErrorFromEmptyData(t *testing.T) {
 
 	_, err := weather.ParseDataAPIResponse([]byte{})
 	if err == nil {
-		t.Fatal("want error parsing empty response, got nil")
+		t.Error("want error parsing empty response, got nil")
 	}
 }
 
@@ -82,7 +89,7 @@ func Test_ParseGeoAPIResponseReturnsErrorFromEmptyData(t *testing.T) {
 
 	_, err := weather.ParseGeoAPIResponse(weather.BrisbaneLocation, []byte{})
 	if err == nil {
-		t.Fatal("want error parsing empty response, got nil")
+		t.Error("want error parsing empty response, got nil")
 	}
 }
 
@@ -95,7 +102,7 @@ func Test_ParseDataAPIResponseReturnsErrorFromInvalidJSON(t *testing.T) {
 	}
 	_, err = weather.ParseDataAPIResponse(data)
 	if err == nil {
-		t.Fatal("want error parsing invalid response, got nil")
+		t.Error("want error parsing invalid response, got nil")
 	}
 }
 
@@ -108,7 +115,7 @@ func Test_ParseGeoAPIResponseReturnsErrorFromInvalidJSON(t *testing.T) {
 	}
 	_, err = weather.ParseGeoAPIResponse(weather.BrisbaneLocation, data)
 	if err == nil {
-		t.Fatal("want error parsing invalid response, got nil")
+		t.Error("want error parsing invalid response, got nil")
 	}
 }
 
@@ -117,7 +124,7 @@ func Test_ParseGeoAPIResponseReturnsErrorFromInvalidLocation(t *testing.T) {
 
 	_, err := weather.ParseGeoAPIResponse("", []byte{})
 	if err == nil {
-		t.Fatal("want error parsing invalid location, got nil")
+		t.Error("want error parsing invalid location, got nil")
 	}
 }
 
@@ -126,15 +133,15 @@ func Test_ValidateGeoAPIResponseReturnsErrorWithInvalidName(t *testing.T) {
 
 	data := []byte{}
 	response := weather.OWMGeoAPIResponse{
-		Name:    "",
-		Country: "AU",
-		Lat:     weather.BrisbaneLatitude,
-		Lon:     weather.BrisbaneLongitude,
+		Name:      "",
+		Country:   "AU",
+		Latitude:  weather.BrisbaneLatitude,
+		Longitude: weather.BrisbaneLongitude,
 	}
 
 	err := weather.ValidateGeoAPIResponse(data, response)
 	if err == nil {
-		t.Fatal("want error parsing invalid name, got nil")
+		t.Error("want error parsing invalid name, got nil")
 	}
 }
 
@@ -143,15 +150,15 @@ func Test_ValidateGeoAPIResponseReturnsErrorWithInvalidLat(t *testing.T) {
 
 	data := []byte{}
 	response := weather.OWMGeoAPIResponse{
-		Name:    "Brisbane",
-		Country: "AU",
-		Lat:     91,
-		Lon:     weather.BrisbaneLongitude,
+		Name:      "Brisbane",
+		Country:   "AU",
+		Latitude:  91,
+		Longitude: weather.BrisbaneLongitude,
 	}
 
 	err := weather.ValidateGeoAPIResponse(data, response)
 	if err == nil {
-		t.Fatal("want error parsing invalid latitude, got nil")
+		t.Error("want error parsing invalid latitude, got nil")
 	}
 }
 
@@ -160,15 +167,15 @@ func Test_ValidateGeoAPIResponseReturnsErrorWithInvalidLon(t *testing.T) {
 
 	data := []byte{}
 	response := weather.OWMGeoAPIResponse{
-		Name:    "Brisbane",
-		Country: "AU",
-		Lat:     weather.BrisbaneLatitude,
-		Lon:     -181,
+		Name:      "Brisbane",
+		Country:   "AU",
+		Latitude:  weather.BrisbaneLatitude,
+		Longitude: -181,
 	}
 
 	err := weather.ValidateGeoAPIResponse(data, response)
 	if err == nil {
-		t.Fatal("want error parsing invalid longitude, got nil")
+		t.Error("want error parsing invalid longitude, got nil")
 	}
 }
 
@@ -177,44 +184,154 @@ func Test_ValidateGeoAPIResponseReturnsErrorWithInvalidLatAndLon(t *testing.T) {
 
 	data := []byte{}
 	response := weather.OWMGeoAPIResponse{
-		Name:    "Brisbane",
-		Country: "AU",
-		Lat:     0,
-		Lon:     0,
+		Name:      "Brisbane",
+		Country:   "AU",
+		Latitude:  0,
+		Longitude: 0,
 	}
 
 	err := weather.ValidateGeoAPIResponse(data, response)
 	if err == nil {
-		t.Fatal("want error parsing invalid latitude and longitude, got nil")
+		t.Error("want error parsing invalid latitude and longitude, got nil")
 	}
 }
 
 func Test_FormatURLReturnsCorrectString(t *testing.T) {
 	t.Parallel()
 
+	baseURL := "https://api.openweathermap.org"
 	api := "/data/2.5/weather?"
 	lat := "-27.4651"
 	long := "153.0231"
 	units := "&units=metric"
-	key := "123MYOWMKEY"
-	want := weather.BaseURL + api + "appid=" + key + "&lat=" + lat +
+	want := baseURL + api + "appid=" + fakeKey + "&lat=" + lat +
 		"&lon=" + long + units
+
+	client := weather.NewClient(fakeKey)
 
 	args := map[string]string{
 		"lat":   lat,
 		"lon":   long,
-		"appid": key,
+		"appid": fakeKey,
 		"units": "metric",
 	}
 
-	encoded := weather.FormatURL(api, args)
+	encoded := client.FormatURL(client.DataAPI, args)
 	got, err := url.QueryUnescape(encoded)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if !cmp.Equal(want, got) {
-		t.Fatal(cmp.Diff(want, got))
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_HTTPGetFromLocalServerWorks(t *testing.T) {
+	t.Parallel()
+
+	// Create a test server with a self signed TLS certificate
+	testServer := httptest.NewServer(
+		http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, "test/data/geo-api-sample.json")
+			}))
+	defer testServer.Close()
+
+	response, err := http.Get(testServer.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := http.StatusOK
+	got := response.StatusCode
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_HTTPSGetFromLocalServerWorks(t *testing.T) {
+	t.Parallel()
+
+	// Create a test server with a self signed TLS certificate
+	testServer := httptest.NewTLSServer(
+		http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, "test/data/data-api-sample.json")
+			}))
+	defer testServer.Close()
+
+	// This allows us to test using TLS with the self signed certificate
+	client := testServer.Client()
+	response, err := client.Get(testServer.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := http.StatusOK
+	got := response.StatusCode
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_GetWeatherWorksWithLocalHTTPSServer(t *testing.T) {
+	t.Parallel()
+
+	wc := weather.NewClient(fakeKey)
+
+	ts := httptest.NewTLSServer(
+		http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				// Recreate the OpenWeather Map Geo and Data API endpoints.
+				switch {
+				case strings.HasPrefix(r.URL.Path, wc.GeoAPI):
+					http.ServeFile(w, r, "test/data/geo-api-sample.json")
+				case strings.HasPrefix(r.URL.Path, wc.DataAPI):
+					http.ServeFile(w, r, "test/data/data-api-sample.json")
+				default:
+					http.NotFound(w, r)
+				}
+			}))
+	defer ts.Close()
+
+	wc.BaseURL = ts.URL
+	wc.HTTPClient = ts.Client()
+
+	got, err := wc.GetWeather(weather.BrisbaneLocation)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := weather.Conditions{
+		Summary:     "Clear",
+		Temperature: 293.79,
+		FeelsLike:   293.69,
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
+	}
+}
+
+func Test_KelvinToCelsiusConversionWorks(t *testing.T) {
+	t.Parallel()
+
+	data, err := os.ReadFile("test/data/data-api-sample.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	conditions, err := weather.ParseDataAPIResponse(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := 20.64
+	got := conditions.Temperature.Celsius()
+
+	// We need a tolerance as "20.640000000000043" can be returned instead of 20.64
+	if !cmp.Equal(want, got, cmpopts.EquateApprox(0, 0.0001)) {
+		t.Error(cmp.Diff(want, got))
 	}
 }
 
