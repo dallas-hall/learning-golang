@@ -27,6 +27,9 @@ type OWMDataAPIResponse struct {
 		Main        string `json:"main"`
 		Description string `json:"description"`
 	} `json:"weather"`
+	Sys struct {
+		CountryCode string `json:"country"`
+	} `json:"sys"`
 }
 
 type OWMGeoAPIResponse struct {
@@ -37,6 +40,8 @@ type OWMGeoAPIResponse struct {
 }
 
 type Conditions struct {
+	City        string
+	CountryCode string
 	Summary     string
 	Temperature Temperature
 	FeelsLike   Temperature
@@ -99,7 +104,9 @@ func ParseDataAPIResponse(data []byte) (Conditions, error) {
 		return Conditions{}, fmt.Errorf("invalid API response %s needs one Weather element", data)
 	}
 	conditions := Conditions{
-		Summary: response.Weather[0].Main,
+		City:        response.Name,
+		CountryCode: response.Sys.CountryCode,
+		Summary:     response.Weather[0].Main,
 		// We need to cast this because of our custom type used for Celsius()
 		Temperature: Temperature(response.Main.Temperature),
 		FeelsLike:   Temperature(response.Main.FeelsLike),
@@ -134,10 +141,15 @@ func ParseGeoAPIResponse(location string, data []byte) (OWMGeoAPIResponse, error
 		return OWMGeoAPIResponse{}, fmt.Errorf("invalid API response %s needs one element", data)
 	}
 
-	// Search for the user supplied city,location combination.
+	// Search for the user supplied city,location combination. We normalise the
+	// strings to lowercase so it is easier to match on.
 	values := strings.Split(location, ",")
+	valuesName := strings.ToLower(values[0])
+	valuesCountry := strings.ToLower(values[1])
 	for _, response := range responses {
-		if strings.Contains(response.Name, values[0]) && response.Country == values[1] {
+		reponseName := strings.ToLower(response.Name)
+		reponseCountry := strings.ToLower(response.Country)
+		if strings.Contains(reponseName, valuesName) && reponseCountry == valuesCountry {
 			err = ValidateGeoAPIResponse(data, response)
 			if err != nil {
 				return OWMGeoAPIResponse{}, fmt.Errorf("%w", err)
@@ -250,7 +262,8 @@ func Main() {
 		fmt.Println(Usage)
 		return
 	}
-	location := os.Args[1]
+	// Covers strings like "New York,US"
+	location := strings.Join(os.Args[1:], " ")
 
 	// Get API key
 	key, err := APIKey()
@@ -266,7 +279,9 @@ func Main() {
 		log.Fatal(err)
 	}
 	fmt.Printf(
-		"Summary: %s\nTemperature: %.1f\nFeels like: %.1f\n",
+		"City: %s\nCountry Code: %s\nSummary: %s\nTemperature: %.1f\nFeels like: %.1f\n",
+		conditions.City,
+		conditions.CountryCode,
 		conditions.Summary,
 		conditions.Temperature.Celsius(),
 		conditions.FeelsLike.Celsius(),
