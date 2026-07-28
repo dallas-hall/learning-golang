@@ -57,7 +57,7 @@ func (l League) Ranking() []string {
 	}
 
 	// Sort our teamNames slice in-place.
-	// sort.Slice handles all the swapping internally. The Use an anonymous
+	// sort.Slice handles all the swapping internally. The anonymous
 	// function tells sort.Slice how to compare the 2 passed in items.
 	// The anonymous function needs to be `func(i, j int) bool`
 	// This anonymous function is also closure because it can use teamNames
