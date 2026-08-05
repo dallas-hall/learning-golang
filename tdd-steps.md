@@ -58,3 +58,11 @@ Test names should be ACE.
 2. We usually don't care what type an error is, as long as they aren't nil.
 3. When it does matter what type an error is, use `errors.Is` to compare them with a sentinel error.
 4. When combining a sentinel error with dynamic information, use `fmt.Errorf` with the `%w` verb to create a wrapped error.
+
+## Generating Useful Test Inputs
+
+* Ask the question: what could go wrong here?
+* Choose inputs from each equivalence class. e.g. positive numbers, negative numbers, integers, floats, 1, 0, -1.
+* `uint` can be used to force positive numbers, but it is better to test inputs being >= 1 instead of relying on this.
+* For slices, pass in a nil slice or empty slice.
+* For pointers, pass in nil.
