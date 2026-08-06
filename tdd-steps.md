@@ -66,3 +66,54 @@ Test names should be ACE.
 * `uint` can be used to force positive numbers, but it is better to test inputs being >= 1 instead of relying on this.
 * For slices, pass in a nil slice or empty slice.
 * For pointers, pass in nil.
+
+## Table Tests
+
+* A table test performs the same check on each set of test cases, which are typically stored inside a struct, but a map can be used with t.Run subtests to do this elegantly with the subtest name stored as the key.
+* Have seperate tests for valid input and invalid input.
+
+```go
+testCases := map[string]struct {
+input []string
+want  string
+}{
+  // The map's key is often the name of the test used by the subtest function.
+  "no items": {
+    input: []string{},
+    want:  "",
+  },
+}
+for name, tc := range testCases {
+  t.Run(name, func(t *testing.T) {
+    got := game.ListItems(tc.input)
+    if tc.want != got {
+      t.Error(cmp.Diff(tc.want, got))
+    }
+  })
+}
+```
+
+## Test Data
+
+* Use fake data when applicable, so readers of the test case know that data is irrelevant to the test.
+
+```go
+got, err := CallAPI(request, "fake API token")
+```
+
+* Rather than using global variables in the test package, create a function that returns the data. This protects against a test modifying test data and producing weird results on other tests. Use this for input that contains maps and slices, including structs whose fields are maps or slices.
+
+```go
+func makeAgeData() map[string]int {
+  return map[string]int{
+    "alice": 18,
+    "bob": 99,
+  }
+}
+```
+
+* If test data gets too big, store it in a file inside of [test/data](https://github.com/golang-standards/project-layout#test), but files are slow so use alternatives where possible.
+* Try using io.Reader/Writer instead of files, which can be handled easily by a bytes.Buffer. eg strings.NewReader("some string") for io.Reader and io.Discard or bytes.Buffer for io.Writer.
+* Use fs.FS for trees of files on disk. See chapter 5 of The Power Of Go: Tools.
+* Use t.TempDir for output with cleanup, combine with t.Name to get the name of the test. `t.TempDir() + "/" + t.Name() + ".txt")
+* 
