@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 )
 
-// Run with `go test -fuzz . -fuzztime=5m`
+// Run with `go test -fuzz . -fuzztime=1m`
 func FuzzFirstRune(f *testing.F) {
 	// Seed the fuzzer's training data corpus with known good inputs. The fuzzer
 	// will mutate these to generate new inputs.
@@ -20,10 +20,10 @@ func FuzzFirstRune(f *testing.F) {
 	f.Fuzz(func(t *testing.T, s string) {
 		got := runes.FirstRune(s)
 		want, _ := utf8.DecodeRuneInString(s)
-		// Apparently size == 0 is a better check, at utf8.RuneError is U+FFFD which
+		// Apparently size == 0 is a better check, as utf8.RuneError is U+FFFD which
 		// is a valid run.
 		if want == utf8.RuneError {
-			// Ignore invalid UTF8 runes, there will be plenty from the fuzzer.
+			// Ignore invalid UTF-8 runes, there will be plenty from the fuzzer.
 			t.Skip()
 		}
 		if want != got {
