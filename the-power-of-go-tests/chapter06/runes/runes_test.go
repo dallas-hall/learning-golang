@@ -27,10 +27,10 @@ func FuzzFirstRune(f *testing.F) {
 			t.Skip()
 		}
 		if want != got {
-			// %q uses s.
-			// %[1]x points to arg 1, s. The cursor remains at s.
-			// %c uses want.
-			// %[2]x points to arg 2, want.
+			// %q uses s. The cursor moves +1 to want.
+			// %[1]x points to arg 1, so uses s. The cursor moves +1 to want.
+			// %c uses want. The cursor is pointing to nothing, no args left.
+			// %[2]x points to arg 2, so uses want.
 			t.Errorf("given %q (0x%[1]x): want '%c' (0x%[2]x)", s, want)
 			t.Errorf("got '%c' (0x%[1]x)", got)
 			// The above is equivalent to:
