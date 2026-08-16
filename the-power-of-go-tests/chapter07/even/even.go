@@ -5,6 +5,8 @@ package even
 // work with.
 // Install dependency with `go install github.com/avito-tech/go-mutesting/cmd/go-mutesting@latest`
 // Run with `go-mutesting .`
+// The flag `--do-not-remove-tmp-folder` can be used to stop deleting the files
+// inside /tmp after the run.
 func IsEven(n int) bool {
 	if n%2 == 0 {
 		return true
