@@ -36,3 +36,32 @@ func IsEvenCache(n int) (even bool) {
 	}
 	return even
 }
+
+/*
+// This function solves most of the mutation testing problems. Except:
+// --- Original
+// +++ New
+// @@ -45,7 +45,8 @@
+//  	even, ok := cache[n]
+//  	if !ok {
+//  		even = n%2 == 0
+// -		cache[n] = even
+// +		_, _, _ = cache, n, even
+// +
+//  	}
+//  	return even
+//  }
+//
+// FAIL "/tmp/go-mutesting-3762901368/even.go.14" with checksum c674df8041c30725e5ca531ce620d80d
+
+func IsEvenCache(n int) (even bool) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	even, ok := cache[n]
+	if !ok {
+		even = n%2 == 0
+		cache[n] = even
+	}
+	return even
+}
+*/
